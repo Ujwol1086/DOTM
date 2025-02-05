@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: ghostwhite;
+}
+
+.captcha-text {
+  font-family: "Courier New", monospace;
+  text-decoration: line-through;
+  transform: rotate(-5deg);
+  display: inline-block;
+}
