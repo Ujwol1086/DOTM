@@ -1,5 +1,5 @@
 import AddressForm from "../components/AddressForm";
-import Upload from "../components/Upload";
+import DisplayCitizenship from "../components/DisplayCitizenship";
 
 const DetailsSecond = () => {
   return (
@@ -168,7 +168,8 @@ const DetailsSecond = () => {
           </form>
         </div>
         <AddressForm />
-        <Upload />
+        <hr />
+        <DisplayCitizenship />
         {/* button */}
         <div className="flex justify-center gap-5 mt-6">
           <button className="px-4 py-2 bg-blue-600 text-white rounded">
