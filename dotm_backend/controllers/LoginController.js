@@ -1,52 +1,50 @@
-import Login from "../models/User.js";
-import MPIN from "../models/MPIN.js";
-import { sendSMS } from "../utils/smsService.js"; // assuming you have an SMS sending utility
+import User from "../models/loginModel.js";
+import sendEmail from "../utility/sendEmail.js"; // Import email sending function
 
 const generateMPIN = () =>
 {
-    return Math.floor(100000 + Math.random() * 900000); // generates a 6-digit MPIN
+    return Math.floor(100000 + Math.random() * 900000); // Generates a 6-digit MPIN
 };
 
 const loginController = async (req, res) =>
 {
-    const { PhoneNumber, captcha } = req.body;
+    const { PhoneNumber, Email } = req.body;
 
     try
     {
-        // Check if the phone number already exists in the database
-        const existingUser = await Login.findOne({ PhoneNumber });
-        if (existingUser)
+        // Check if the user exists
+        let user = await User.findOne({ PhoneNumber });
+
+        if (user)
         {
-            return res.status(400).json({ message: "Phone number already registered." });
+            // If user exists, send the existing MPIN via email
+            await sendEmail(PhoneNumber, user.Email, user.MPIN);
+            return res.status(200).json({ message: "Redirect to MPIN page.", MPIN: user.MPIN });
         }
 
-        // Create a new user
-        const newUser = new Login({
-            PhoneNumber,
-            captcha
-        });
-
-        // Generate MPIN
+        // If user is new, generate MPIN and create user
         const mpin = generateMPIN();
-        const newMPIN = new MPIN({
-            MPIN: mpin,
-            PhoneNumber
+
+        console.log(mpin)
+        console.log(Email)
+
+        const newUser = new User({
+            PhoneNumber,
+            Email,
+            MPIN: mpin // Save MPIN directly in the User model
         });
 
-        // Save MPIN to database
-        await newMPIN.save();
-
-        // Save the MPIN reference in the user document
-        newUser.mpin = newMPIN._id;
+        // Save user to database
         await newUser.save();
 
-        // Send MPIN to the phone number
-        await sendSMS(PhoneNumber, `Your MPIN is: ${mpin}`);
+        // Send MPIN via email
+        await sendEmail(PhoneNumber, Email, mpin);
 
-        return res.status(200).json({ message: "MPIN sent successfully." });
+        return res.status(200).json({ message: "MPIN sent successfully via email. Redirect to MPIN page.", MPIN: mpin });
+
     } catch (error)
     {
-        console.log(error.message);
+        console.error(error.message);
         return res.status(500).json({ message: "An error occurred." });
     }
 };

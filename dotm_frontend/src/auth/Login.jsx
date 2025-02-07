@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../components/Footer";
+import axios from "axios";
 
 const Login = () => {
   const [captcha, setCaptcha] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [email, setEmail] = useState("");
   const [captchaInput, setCaptchaInput] = useState("");
   const [captchaValid, setCaptchaValid] = useState(true);
   const [mpinSent, setMpinSent] = useState(false);
@@ -23,35 +25,46 @@ const Login = () => {
     setCaptcha(randomCaptcha);
   };
 
-  // Function to generate a 6-digit random MPIN
-  const generateMpin = () => {
-    let mpin = "";
-    for (let i = 0; i < 6; i++) {
-      mpin += Math.floor(Math.random() * 10); // 6-digit number
-    }
-    return mpin;
-  };
-
   // Function to handle Next button click
-  const handleNextClick = () => {
+  const handleNextClick = async () => {
     if (!phoneNumber) {
       alert("Please enter a phone number.");
+      return;
     }
+
     if (captchaInput === captcha) {
       setCaptchaValid(true);
-      if (!mpinSent) {
-        const generatedMpin = generateMpin();
-        // Simulate sending MPIN to phone number
-        console.log("MPIN sent to phone:", generatedMpin); // You would send the MPIN via API here.
 
-        // Save MPIN to local storage for future use (or back-end)
-        localStorage.setItem("mpin", generatedMpin);
-        setMpinSent(true);
+      try {
+        const response = await axios.post(
+          "http://localhost:5000/api/users/login",
+          {
+            PhoneNumber: phoneNumber,
+            Email: email,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        localStorage.setItem("PhoneNumber", phoneNumber);
+
+        if (response.status === 200) {
+          console.log("MPIN Sent:", response.data.MPIN);
+          setMpinSent(true);
+          navigate("/mpin");
+        } else {
+          alert("Failed to send MPIN. Please try again.");
+        }
+      } catch (error) {
+        console.error("Error:", error.response?.data?.message || error.message);
+        // alert(error.response?.data?.message || "An error occurred.");
       }
-      // Redirect to /mpin after successful validation
-      navigate("/mpin"); // Use navigate() instead of history.push()
     } else {
       setCaptchaValid(false);
+      alert("Captcha is incorrect!");
     }
   };
 
@@ -101,6 +114,19 @@ const Login = () => {
                 placeholder="Mobile No"
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
+                required
+              />
+            </div>
+            <div className="flex flex-col mt-5">
+              <label htmlFor="phoneNumber">
+                <strong className="font-semibold">Enter your Email</strong>{" "}
+              </label>
+              <input
+                type="email"
+                className="border border-gray-400 rounded px-3 py-1 mt-2 focus:outline-none focus:border-blue-500 placeholder:text-sm "
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>

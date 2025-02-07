@@ -1,24 +1,66 @@
-import { useState, useEffect } from "react";
+import axios from "axios";
+import { useEffect, useState } from "react";
 
 const MPIN = () => {
-  const [captcha, setCaptcha] = useState("");
-
-  // Function to generate a random alphanumeric string
-  const generateCaptcha = () => {
-    const characters =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    let randomCaptcha = "";
-    for (let i = 0; i < 5; i++) {
-      randomCaptcha += characters.charAt(
-        Math.floor(Math.random() * characters.length)
-      );
-    }
-    setCaptcha(randomCaptcha);
-  };
+  const [mpin, setMpin] = useState("");
+  const [isMPINVerified, setIsMPINVerified] = useState(false);
+  const [error, setError] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
 
   useEffect(() => {
-    generateCaptcha(); // Generate captcha on component mount
+    // Retrieve phone number from local storage when component loads
+    const storedPhoneNumber = localStorage.getItem("PhoneNumber");
+
+    if (storedPhoneNumber) {
+      setPhoneNumber(storedPhoneNumber);
+    } else {
+      console.error("PhoneNumber not found in localStorage");
+    }
   }, []);
+
+  // Handle MPIN submission
+  const handleMPINSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/mpin/verifympin",
+        {
+          PhoneNumber: phoneNumber,
+          MPIN: mpin,
+        }
+      );
+
+      if (response.status === 200) {
+        setIsMPINVerified(true);
+        setError("");
+      }
+    } catch (err) {
+      setIsMPINVerified(false);
+      setError("Invalid MPIN. Please try again.");
+      console.log(err.message);
+    }
+  };
+
+  // Handle MPIN resend
+  const handleResendMPIN = async () => {
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/mpin/resendmpin",
+        {
+          PhoneNumber: phoneNumber,
+        }
+      );
+
+      if (response.status === 200) {
+        setError("");
+        alert("New MPIN sent to your email.");
+      }
+    } catch (err) {
+      setError("Error sending new MPIN.");
+      console.log(err.message);
+    }
+  };
 
   return (
     <>
@@ -36,10 +78,15 @@ const MPIN = () => {
             <input
               type="number"
               className="border border-gray-400 rounded px-3 py-1 mt-2 focus:outline-none focus:border-blue-500 placeholder:text-sm"
-              placeholder="Check mpin in your mobile message box"
+              placeholder="Check mpin in your email"
+              value={mpin}
+              onChange={(e) => setMpin(e.target.value)}
               required
             />
           </div>
+
+          {error && <div className="text-red-600 mt-3">{error}</div>}
+
           <div className="mt-5">
             <p className="text-sm">
               <i>
@@ -49,13 +96,19 @@ const MPIN = () => {
             </p>
           </div>
           <div>
-            <button className="mt-5 text-blue-600 text-sm font-semibold float-right">
+            <button
+              className="mt-5 text-blue-600 text-sm font-semibold float-right"
+              onClick={handleResendMPIN}
+            >
               Forgot MPIN ? Please Click here to Re-Send MPIN.
             </button>
           </div>
           {/* Submit Button */}
-          <button className="bg-blue-600 text-white font-bold py-2 px-4 w-full mt-5 rounded">
-            Next
+          <button
+            className="bg-blue-600 text-white font-bold py-2 px-4 w-full mt-5 rounded"
+            onClick={handleMPINSubmit}
+          >
+            {isMPINVerified ? "MPIN Verified" : "Next"}
           </button>
         </div>
 

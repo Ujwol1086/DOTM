@@ -3,6 +3,9 @@ import connectDB from "./config/db.js";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import userRoutes from "./routes/userRoute.js";
+import mpinRoutes from "./routes/mpinRoutes.js"
+
 
 dotenv.config();
 
@@ -25,7 +28,8 @@ app.get("/", (req, res) =>
 {
     res.send("Server is running");
 });
-app.use("/api/auth", userRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/mpin", mpinRoutes)
 
 
 app.listen(port, () => console.log("Server is running on port " + port));

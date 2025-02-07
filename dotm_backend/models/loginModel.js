@@ -4,15 +4,15 @@ const loginSchema = new mongoose.Schema({
     PhoneNumber: {
         type: Number,
         required: true,
-        unique: true
+        // unique: true
     },
-    captcha: {
+    Email: {
         type: String,
-        required: true
+        required: true,
     },
-    mpin: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "MPIN"
+    MPIN: {
+        type: Number,
+        reuired: true
     }
 });
 
