@@ -4,15 +4,16 @@ const loginSchema = new mongoose.Schema({
     PhoneNumber: {
         type: Number,
         required: true,
-        // unique: true
+        unique: true
     },
     Email: {
         type: String,
         required: true,
+        unique: true
     },
     MPIN: {
         type: Number,
-        reuired: true
+        required: true
     }
 });
 

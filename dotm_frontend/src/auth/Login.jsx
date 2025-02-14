@@ -9,8 +9,11 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [captchaInput, setCaptchaInput] = useState("");
   const [captchaValid, setCaptchaValid] = useState(true);
-  const [mpinSent, setMpinSent] = useState(false);
-  const navigate = useNavigate(); // Use useNavigate instead of useHistory
+  const [mpin, setMpin] = useState("");
+  const [isMPINVerified, setIsMPINVerified] = useState(false);
+  const [error, setError] = useState("");
+  const [step, setStep] = useState(1); // Step 1: Login, Step 2: MPIN verification
+  const navigate = useNavigate();
 
   // Function to generate a random alphanumeric string for captcha
   const generateCaptcha = () => {
@@ -25,10 +28,10 @@ const Login = () => {
     setCaptcha(randomCaptcha);
   };
 
-  // Function to handle Next button click
-  const handleNextClick = async () => {
-    if (!phoneNumber) {
-      alert("Please enter a phone number.");
+  // Handle Next button click for login
+  const handleLoginNextClick = async () => {
+    if (!phoneNumber || !email) {
+      alert("Please enter both phone number and email.");
       return;
     }
 
@@ -50,21 +53,65 @@ const Login = () => {
         );
 
         localStorage.setItem("PhoneNumber", phoneNumber);
+        alert(response.data.message);
 
         if (response.status === 200) {
-          console.log("MPIN Sent:", response.data.MPIN);
-          setMpinSent(true);
-          navigate("/mpin");
+          setStep(2); // Move to MPIN step
         } else {
           alert("Failed to send MPIN. Please try again.");
         }
       } catch (error) {
         console.error("Error:", error.response?.data?.message || error.message);
-        // alert(error.response?.data?.message || "An error occurred.");
       }
     } else {
       setCaptchaValid(false);
       alert("Captcha is incorrect!");
+    }
+  };
+
+  // Handle MPIN submission
+  const handleMPINSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/users/verify-mpin",
+        {
+          PhoneNumber: phoneNumber,
+          MPIN: mpin,
+        }
+      );
+
+      if (response.status === 200) {
+        setIsMPINVerified(true);
+        setError("");
+        // Redirect to the next page or dashboard
+        navigate("/profile");
+      }
+    } catch (err) {
+      setIsMPINVerified(false);
+      setError("Invalid MPIN. Please try again.");
+      console.log(err.message);
+    }
+  };
+
+  // Handle MPIN resend
+  const handleResendMPIN = async () => {
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/users/resend-mpin",
+        {
+          PhoneNumber: phoneNumber,
+        }
+      );
+
+      if (response.status === 200) {
+        setError("");
+        alert("New MPIN sent to your email.");
+      }
+    } catch (err) {
+      setError("Error sending new MPIN.");
+      console.log(err.message);
     }
   };
 
@@ -99,82 +146,127 @@ const Login = () => {
 
         <div className="flex mt-10">
           <div className=" ml-24 bg-white p-5 w-[40%] rounded-tl-lg rounded-bl-lg">
-            <div className="flex flex-col">
-              <label htmlFor="phoneNumber">
-                <strong className="font-semibold">
-                  Enter your own Mobile Number
-                </strong>{" "}
-                <span className="text-sm">
-                  (आफ्नो मोबाइल नम्बर प्रविष्ट गर्नुहोस्)
-                </span>
-              </label>
-              <input
-                type="number"
-                className="border border-gray-400 rounded px-3 py-1 mt-2 focus:outline-none focus:border-blue-500 placeholder:text-sm "
-                placeholder="Mobile No"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                required
-              />
-            </div>
-            <div className="flex flex-col mt-5">
-              <label htmlFor="phoneNumber">
-                <strong className="font-semibold">Enter your Email</strong>{" "}
-              </label>
-              <input
-                type="email"
-                className="border border-gray-400 rounded px-3 py-1 mt-2 focus:outline-none focus:border-blue-500 placeholder:text-sm "
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <div className="mt-5">
-              <span className="text-rose-600 font-bold">Important:</span>
-              <p className="text-sm">
-                <i>
-                  Please use the mobile number registered with your name to sign
-                  up. You are not allowed to change it afterward. <br /> (यो
-                  अनलाईन फाराम भर्नका लागि प्रयोग गरिने मोबाईल नं. पछि परिवर्तन
-                  गर्न नमिल्ने भएकोले आफ्नै नाममा रहेको मोबाईल नं. मात्र प्रयोग
-                  गर्नुहोला ।)
-                </i>
-              </p>
-            </div>
+            {step === 1 ? (
+              <>
+                <div className="flex flex-col">
+                  <label htmlFor="phoneNumber">
+                    <strong className="font-semibold">
+                      Enter your own Mobile Number
+                    </strong>{" "}
+                    <span className="text-sm">
+                      (आफ्नो मोबाइल नम्बर प्रविष्ट गर्नुहोस्)
+                    </span>
+                  </label>
+                  <input
+                    type="number"
+                    className="border border-gray-400 rounded px-3 py-1 mt-2 focus:outline-none focus:border-blue-500 placeholder:text-sm "
+                    placeholder="Mobile No"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="flex flex-col mt-5">
+                  <label htmlFor="phoneNumber">
+                    <strong className="font-semibold">Enter your Email</strong>{" "}
+                  </label>
+                  <input
+                    type="email"
+                    className="border border-gray-400 rounded px-3 py-1 mt-2 focus:outline-none focus:border-blue-500 placeholder:text-sm "
+                    placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="mt-5 ">
+                  <p>
+                    <strong className="text-red-500 ">Important:</strong>
+                  </p>
+                  <p className="text-sm italic">
+                    Please use the mobile number registered with your name to
+                    sign up. You are not allowed to change it afterward. <br />
+                    (यो अनलाईन फाराम भर्नका लागि प्रयोग गरिने मोबाईल नं. पछि
+                    परिवर्तन गर्न नमिल्ने भएकोले आफ्नै नाममा रहेको मोबाईल नं.
+                    मात्र प्रयोग गर्नुहोला ।)
+                  </p>
+                </div>
 
-            {/* Captcha Section */}
-            <div className="mt-5">
-              <div className="bg-gray-200 p-3 text-2xl font-bold tracking-wider text-center captcha-text">
-                {captcha}
-              </div>
-              <label htmlFor="captcha" className=" mt-3 block">
-                <strong className="font-semibold">Enter captcha</strong>{" "}
-                <span className="text-sm">
-                  (माथि चित्रमा देखिएका अक्षरहरू प्रविष्ट गर्नुहोस्।)
-                </span>
-              </label>
-              <input
-                type="text"
-                id="captcha"
-                className="border border-gray-400 rounded w-full py-1 px-3 mt-2 focus:outline-none focus:border-blue-500 placeholder:text-sm"
-                placeholder="Captcha"
-                value={captchaInput}
-                onChange={(e) => setCaptchaInput(e.target.value)}
-                required
-              />
-              {!captchaValid && (
-                <p className="text-red-600">Captcha is incorrect!</p>
-              )}
-            </div>
+                {/* Captcha Section */}
+                <div className="mt-5">
+                  <div className="bg-gray-200 p-3 text-2xl font-bold tracking-wider text-center captcha-text">
+                    {captcha}
+                  </div>
+                  <label htmlFor="captcha" className=" mt-3 block">
+                    <strong className="font-semibold">Enter captcha</strong>{" "}
+                    <span className="text-sm">
+                      (माथि चित्रमा देखिएका अक्षरहरू प्रविष्ट गर्नुहोस्।)
+                    </span>
+                  </label>
+                  <input
+                    type="text"
+                    id="captcha"
+                    className="border border-gray-400 rounded w-full py-1 px-3 mt-2 focus:outline-none focus:border-blue-500 placeholder:text-sm"
+                    placeholder="Captcha"
+                    value={captchaInput}
+                    onChange={(e) => setCaptchaInput(e.target.value)}
+                    required
+                  />
+                  {!captchaValid && (
+                    <p className="text-red-600">Captcha is incorrect!</p>
+                  )}
+                </div>
 
-            {/* Submit Button */}
-            <button
-              className="bg-blue-600 text-white font-bold py-2 px-4 w-full mt-5 rounded"
-              onClick={handleNextClick}
-            >
-              Next
-            </button>
+                {/* Submit Button */}
+                <button
+                  className="bg-blue-600 text-white font-bold py-2 px-4 w-full mt-5 rounded"
+                  onClick={handleLoginNextClick}
+                >
+                  Next
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="flex flex-col">
+                  <label htmlFor="mpin">
+                    <strong className="font-semibold">Enter your MPIN</strong>
+                  </label>
+                  <input
+                    type="number"
+                    className="border border-gray-400 rounded px-3 py-1 mt-2 focus:outline-none focus:border-blue-500 placeholder:text-sm"
+                    placeholder="Enter your MPIN"
+                    value={mpin}
+                    onChange={(e) => setMpin(e.target.value)}
+                    required
+                  />
+                </div>
+                {error && <div className="text-red-600 mt-3">{error}</div>}
+
+                <div className="mt-5">
+                  <p className="text-sm">
+                    <i>
+                      Check SMS for MPIN No. <br /> Please Note: Same MPIN is
+                      used to Login Multiple times.
+                    </i>
+                  </p>
+                </div>
+                <div>
+                  <button
+                    className="mt-5 text-blue-600 text-sm font-semibold float-right"
+                    onClick={handleResendMPIN}
+                  >
+                    Forgot MPIN? Click here to Re-Send MPIN.
+                  </button>
+                </div>
+
+                <button
+                  className="bg-blue-600 text-white font-bold py-2 px-4 w-full mt-5 rounded"
+                  onClick={handleMPINSubmit}
+                >
+                  {isMPINVerified ? "MPIN Verified" : "Next"}
+                </button>
+              </>
+            )}
           </div>
 
           <div className="p-5 bg-slate-100 w-[47%]">
