@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import userRoutes from "./routes/userRoute.js";
+import detailsRoutes from "./routes/detailsRoute.js";
+import profileRoutes from "./routes/profileRoutes.js"
 
 
 dotenv.config();
@@ -28,6 +30,8 @@ app.get("/", (req, res) =>
     res.send("Server is running");
 });
 app.use("/api/users", userRoutes);
+app.use("/api/details", detailsRoutes);
+app.use("/api/profile", profileRoutes);
 
 
 app.listen(port, () => console.log("Server is running on port " + port));

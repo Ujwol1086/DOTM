@@ -78,15 +78,17 @@ const Login = () => {
         "http://localhost:5000/api/users/verify-mpin",
         {
           PhoneNumber: phoneNumber,
-          MPIN: mpin,
+          MPIN: Number(mpin),
         }
       );
+
+      console.log(response.data);
 
       if (response.status === 200) {
         setIsMPINVerified(true);
         setError("");
         // Redirect to the next page or dashboard
-        navigate("/profile");
+        navigate("/details");
       }
     } catch (err) {
       setIsMPINVerified(false);

@@ -45,7 +45,7 @@ const sendEmail = async (PhoneNumber, Email, MPIN) =>
         };
 
         await transporter.sendMail(mailOptions);
-        console.log(`MPIN sent successfully to: ${userEmail}`);
+        // console.log(`MPIN sent successfully to: ${userEmail}`);
 
         return { success: true, message: "Email sent successfully." };
     } catch (error)
