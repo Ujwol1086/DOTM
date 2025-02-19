@@ -1,6 +1,11 @@
 import mongoose from "mongoose";
 
 const addressSchema = new mongoose.Schema({
+    applicantId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Applicant",
+        required: true
+    },
     province: {
         type: String,
         required: true
@@ -15,7 +20,7 @@ const addressSchema = new mongoose.Schema({
     },
     ward: {
         type: Number,
-        required: true
+        required: false
     },
     tole: {
         type: String,
@@ -35,7 +40,7 @@ const addressSchema = new mongoose.Schema({
     },
     currentward: {
         type: Number,
-        required: true
+        required: false
     },
     currenttole: {
         type: String,

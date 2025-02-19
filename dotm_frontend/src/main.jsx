@@ -11,6 +11,7 @@ import App from "./App.jsx";
 import Login from "./auth/Login.jsx";
 import DetailsFirst from "./Pages/DetailsFirst.jsx";
 import DetailsSecond from "./Pages/DetailsSecond.jsx";
+import DisplayCitizenship from "./components/DisplayCitizenship.jsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -18,6 +19,7 @@ const router = createBrowserRouter(
       <Route path="/" element={<Login />} />
       <Route path="/details" element={<DetailsFirst />} />
       <Route path="/profile" element={<DetailsSecond />} />
+      <Route path="/display-details" element={<DisplayCitizenship />} />
     </Route>
   )
 );

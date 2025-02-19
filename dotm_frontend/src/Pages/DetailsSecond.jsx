@@ -3,7 +3,7 @@ import axios from "axios"; // Make sure to import axios
 import AddressForm from "../components/AddressForm";
 import DisplayCitizenship from "../components/DisplayCitizenship";
 
-const DetailsSecond = ({ addressData, setAddressData }) => {
+const DetailsSecond = () => {
   // State variables to store form data
   const [applicantData, setApplicantData] = useState({
     FirstName: "",
@@ -24,25 +24,39 @@ const DetailsSecond = ({ addressData, setAddressData }) => {
     lastName: "",
   });
 
+  const [addressData, setAddressData] = useState({
+    province: "",
+    district: "",
+    municipality: "",
+    wardNo: "",
+    tole: "",
+    currentprovince: "",
+    currentdistrict: "",
+    currentmunicipality: "",
+    currentwardNo: "",
+    currenttole: "",
+  });
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Prepare the data to be sent to the backend
+    // Combine all form data
     const dataToSubmit = {
       ...applicantData,
-      // ...guardianData,
-      // ...addressData, // Combine details and address data
+      ...guardianData,
+      ...addressData,
     };
 
     try {
-      // Sending data to the backend (adjust the URL as needed)
       const response = await axios.post(
-        "http://localhost:5000/api/profile/applicant-details",
+        "http://localhost:5000/api/profile/profile-details",
         dataToSubmit
       );
-      console.log(response.data); // Handle successful submission
+      console.log(response.data);
+      alert("Profile details submitted successfully!");
     } catch (error) {
-      console.error("Error occurred:", error); // Handle error
+      console.error("Error:", error);
+      alert("Error submitting details");
     }
   };
 
@@ -312,9 +326,6 @@ const DetailsSecond = ({ addressData, setAddressData }) => {
             </div>
 
             <AddressForm setAddressData={setAddressData} />
-
-            <hr />
-            <DisplayCitizenship />
 
             {/* Submit button */}
             <div className="flex justify-center gap-5 mt-6">

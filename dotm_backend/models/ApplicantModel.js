@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 const applicantSchema = new mongoose.Schema({
+
     FirstName: {
         type: String,
         required: true
@@ -15,11 +16,11 @@ const applicantSchema = new mongoose.Schema({
     },
     gender: {
         type: String,
-        required: true
+        required: false
     },
     bloodGroup: {
         type: String,
-        required: true,
+        required: false,
     },
     identityMark: {
         type: String,
@@ -31,7 +32,7 @@ const applicantSchema = new mongoose.Schema({
     },
     education: {
         type: String,
-        required: true
+        required: false
     },
     trainingInstitute: {
         type: String,

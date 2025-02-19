@@ -1,6 +1,11 @@
 import mongoose from "mongoose";
 
 const detailSchema = new mongoose.Schema({
+    applicantId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Applicant",
+        required: true
+    },
     FirstName: {
         type: String,
         required: true

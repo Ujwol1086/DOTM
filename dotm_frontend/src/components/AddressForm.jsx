@@ -142,6 +142,7 @@ const AddressForm = ({ setAddressData }) => {
               value={addressData.currentprovince}
               onChange={handleAddressChange}
             >
+              <option>Select Province</option>
               <option>Bagmati Province</option>
             </select>
           </div>

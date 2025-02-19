@@ -1,9 +1,10 @@
 import mongoose from "mongoose";
 
 const guardianSchema = new mongoose.Schema({
+
     relationship: {
         type: String,
-        required: true,
+        required: false,
     },
     firstName: {
         type: String,

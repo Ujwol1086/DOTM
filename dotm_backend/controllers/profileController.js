@@ -1,137 +1,94 @@
 import Applicant from "../models/ApplicantModel.js";
 import Address from "../models/AddressModel.js";
 import Guardian from "../models/GuardianModel.js";
+import details from "../models/DetailsModel.js";
 
-export const insertApplicant = async (req, res) =>
+export const insertProfileDetails = async (req, res) =>
 {
     try
     {
-        // Extract data from the request body
         const {
-            FirstName,
-            MiddleName,
-            LastName,
-            gender,
-            bloodGroup,
-            identityMark,
-            profession,
-            education,
-            trainingInstitute
+            // Applicant Data
+            FirstName, MiddleName, LastName, gender, bloodGroup,
+            identityMark, profession, education, trainingInstitute,
+
+            // Address Data
+            province, district, municipality, wardNo, tole,
+            currentprovince, currentdistrict, currentmunicipality,
+            currentwardNo, currenttole,
+
+            // Guardian Data
+            relationship, firstName, middleName, lastName
         } = req.body;
 
-        // Create a new applicant instance
+        // Insert Applicant Data
         const newApplicant = new Applicant({
-            FirstName,
-            MiddleName,
-            LastName,
-            gender,
-            bloodGroup,
-            identityMark,
-            profession,
-            education,
-            trainingInstitute
+            FirstName, MiddleName, LastName, gender, bloodGroup,
+            identityMark, profession, education, trainingInstitute
         });
-
-        // Save the new applicant to the database
         await newApplicant.save();
 
-        // Respond with the created applicant
-        res.status(201).json({
-            message: "Applicant created successfully!",
-            applicant: newApplicant
-        });
-    } catch (error)
-    {
-        // Handle errors and respond with the error message
-        console.error("Error inserting applicant:", error);
-        res.status(500).json({
-            message: "Error occurred while creating applicant",
-            error: error.message
-        });
-    }
-};
-
-export const insertAddress = async (req, res) =>
-{
-    try
-    {
-        // Extract data from the request body
-        const {
-            province,
-            district,
-            municipality,
-            ward,
-            tole,
-            currentprovince,
-            currentdistrict,
-            currentmunicipality,
-            currentward,
-            currenttole
-        } = req.body;
-
-        // Create a new address instance
+        // Insert Address Data
         const newAddress = new Address({
-            province,
-            district,
-            municipality,
-            ward,
-            tole,
-            currentprovince,
-            currentdistrict,
-            currentmunicipality,
-            currentward,
-            currenttole
+            province, district, municipality, wardNo, tole,
+            currentprovince, currentdistrict, currentmunicipality,
+            currentwardNo, currenttole
         });
-
-        // Save the new address to the database
         await newAddress.save();
 
-        // Respond with the created address
-        res.status(201).json({
-            message: "Address created successfully!",
-            address: newAddress
+        // Insert Guardian Data
+        const newGuardian = new Guardian({
+            relationship, firstName, middleName, lastName
         });
+        await newGuardian.save();
+
+        // Send a success response
+        res.status(201).json({
+            message: "Profile details saved successfully!",
+            applicant: newApplicant,
+            address: newAddress,
+            guardian: newGuardian
+        });
+
     } catch (error)
     {
-        // Handle errors and respond with the error message
-        console.error("Error inserting address:", error);
+        console.error("Error inserting profile details:", error);
         res.status(500).json({
-            message: "Error occurred while creating address",
+            message: "Error occurred while saving profile details",
             error: error.message
         });
     }
 };
 
-export const insertGuardian = async (req, res) =>
+export const getProfileDetails = async (req, res) =>
 {
     try
     {
-        // Extract data from the request body
-        const { relationship, firstName, middleName, lastName } = req.body;
+        const { id } = req.params;
 
-        // Create a new guardian instance
-        const newGuardian = new Guardian({
-            relationship,
-            firstName,
-            middleName,
-            lastName
+        // Find the applicant by ID
+        const applicant = await Applicant.findById(id);
+        if (!applicant)
+        {
+            return res.status(404).json({ message: "Applicant not found" });
+        }
+
+        // Find associated address, guardian, and citizenship details
+        const address = await Address.findOne({ applicantId: id });
+        const guardian = await Guardian.findOne({ applicantId: id });
+        const detail = await details.findOne({ applicantId: id });
+
+        // Combine all data into a single response
+        res.status(200).json({
+            applicant,
+            address,
+            guardian,
+            detail
         });
 
-        // Save the new guardian to the database
-        await newGuardian.save();
-
-        // Respond with the created guardian
-        res.status(201).json({
-            message: "Guardian created successfully!",
-            guardian: newGuardian
-        });
     } catch (error)
     {
-        // Handle errors and respond with the error message
-        console.error("Error inserting guardian:", error);
-        res.status(500).json({
-            message: "Error occurred while creating guardian",
-            error: error.message
-        });
+        console.error("Error fetching profile details:", error);
+        res.status(500).json({ message: "Error retrieving details" });
     }
 };
