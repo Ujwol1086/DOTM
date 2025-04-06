@@ -1,11 +1,13 @@
 import mongoose from "mongoose";
 
 const detailSchema = new mongoose.Schema({
+
     applicantId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Applicant",
         required: true
     },
+
     FirstName: {
         type: String,
         required: true
@@ -18,26 +20,30 @@ const detailSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    dob: {
-        type: Date,
-        required: true
+    gender: {
+        type: String,
+        required: false
     },
-    citizenshipNo: {
+    bloodGroup: {
+        type: String,
+        required: false,
+    },
+    identityMark: {
+        type: String,
+        required: false
+    },
+    profession: {
         type: String,
         required: true
     },
-    IssuedDistrict: {
+    education: {
         type: String,
-        required: true
+        required: false
     },
-    IssuedDate: {
-        type: Date,
-        required: true
-    },
-    Email: {
+    trainingInstitute: {
         type: String,
-        required: true
-    }
+        required: false
+    },
 });
 
 const details = mongoose.model("Detail", detailSchema);

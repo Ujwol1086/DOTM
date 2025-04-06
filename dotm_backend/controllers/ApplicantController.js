@@ -1,6 +1,5 @@
-import Detail from "../models/DetailsModel.js"; // Import the model
+import Applicant from "../models/ApplicantModel.js"; // Ensure this is the correct model for personal data
 
-// Controller to insert user details
 export const insertDetails = async (req, res) =>
 {
     try
@@ -13,17 +12,17 @@ export const insertDetails = async (req, res) =>
             citizenshipNo,
             IssuedDistrict,
             IssuedDate,
-            Email
+            Email,
         } = req.body;
 
-        // Validate required fields
+        // Validation (ensure fields are provided)
         if (!FirstName || !LastName || !dob || !citizenshipNo || !IssuedDistrict || !IssuedDate || !Email)
         {
             return res.status(400).json({ message: "All required fields must be filled." });
         }
 
-        // Create a new detail document
-        const newDetail = new Detail({
+        // Create a new applicant entry (store personal information)
+        const newApplicant = new Applicant({
             FirstName,
             MiddleName,
             LastName,
@@ -31,16 +30,20 @@ export const insertDetails = async (req, res) =>
             citizenshipNo,
             IssuedDistrict,
             IssuedDate,
-            Email
+            Email,
         });
 
         // Save to database
-        await newDetail.save();
+        await newApplicant.save();
 
-        return res.status(201).json({ message: "Details inserted successfully.", data: newDetail });
+        return res.status(201).json({
+            message: "Personal details submitted successfully.",
+            applicantId: newApplicant._id,
+        });
+
     } catch (error)
     {
-        console.error("Error inserting details:", error.message);
-        return res.status(500).json({ message: "An error occurred while inserting details." });
+        console.error("Error inserting personal details:", error.message);
+        return res.status(500).json({ message: "An error occurred while inserting personal details." });
     }
 };

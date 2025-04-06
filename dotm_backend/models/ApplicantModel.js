@@ -14,29 +14,25 @@ const applicantSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    gender: {
-        type: String,
-        required: false
+    dob: {
+        type: Date,
+        required: true
     },
-    bloodGroup: {
-        type: String,
-        required: false,
-    },
-    identityMark: {
-        type: String,
-        required: false
-    },
-    profession: {
+    citizenshipNo: {
         type: String,
         required: true
     },
-    education: {
+    IssuedDistrict: {
         type: String,
-        required: false
+        required: true
     },
-    trainingInstitute: {
+    IssuedDate: {
+        type: Date,
+        required: true
+    },
+    Email: {
         type: String,
-        required: false
+        required: true
     }
 });
 
